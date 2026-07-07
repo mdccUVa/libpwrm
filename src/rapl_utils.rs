@@ -188,7 +188,7 @@ impl Display for RAPLUtilsError {
 
 impl CPUMonitor {
     const INTEL_VENDOR_ID: u32 = 0x6c65746e; // "ntel" from "GenuineIntel" in little-endian ASCII.
-    const AMD_VENDOR_ID: u32 = 0x446d4163; // "cAMD" from "AuthenticAMD" in little-endian ASCII.
+    const AMD_VENDOR_ID: u32 = 0x444d4163; // "cAMD" from "AuthenticAMD" in little-endian ASCII.
 
     pub(super) fn new() -> Result<Self, RAPLUtilsError> {
         // We need to ID the CPU vendor as the MSR register use differente addresses on Intel/AMD.
