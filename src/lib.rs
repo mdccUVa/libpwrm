@@ -100,9 +100,16 @@ fn monitoring_loop(sampling_interval_ms: u64) {
         (cuda_data, current_cuda_data, cuda_results)
     };
 
-    // Create/open output files:
-    fs::create_dir_all(&CONFIG.lock().unwrap().output_dir)
-        .expect("[POWER METER] Failed to create output directory");
+    // Create/open output files, if saving anything:
+    let mut is_saving = CONFIG.lock().unwrap().cpu_out_filename.is_some();
+    #[cfg(feature = "nvidia")]
+    {
+        is_saving |= CONFIG.lock().unwrap().gpu_out_filename.is_some();
+    }
+    if is_saving {
+        fs::create_dir_all(&CONFIG.lock().unwrap().output_dir)
+            .expect("[POWER METER] Failed to create output directory");
+    }
 
     let mut cpu_out = match CONFIG.lock().unwrap().cpu_out_filename {
         Some(ref filename) => Some(
