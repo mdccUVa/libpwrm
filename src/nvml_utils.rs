@@ -27,6 +27,43 @@ use nvml_bindings::*;
 /// Limit on the number of CUDA GPUs supported by this utility. Arbitrarily set.
 const MAX_GPUS_SUPPORTED: usize = 4;
 
+/// Names for NVML's `nvmlReturn_t` possible values.
+///
+/// NVML_ERROR_UNKNOWN is not included, as it should never be returned.
+const NVML_ERROR_NAMES: [&str; 31] = [
+    "NVML_SUCCESS",
+    "NVML_ERROR_UNINITIALIZED",
+    "NVML_ERROR_INVALID_ARGUMENT",
+    "NVML_ERROR_NOT_SUPPORTED",
+    "NVML_ERROR_NO_PERMISSION",
+    "NVML_ERROR_ALREADY_INITIALIZED",
+    "NVML_ERROR_NOT_FOUND",
+    "NVML_ERROR_INSUFFICIENT_SIZE",
+    "NVML_ERROR_INSUFFICIENT_POWER",
+    "NVML_ERROR_DRIVER_NOT_LOADED",
+    "NVML_ERROR_TIMEOUT",
+    "NVML_ERROR_IRQ_ISSUE",
+    "NVML_ERROR_LIBRARY_NOT_FOUND",
+    "NVML_ERROR_FUNCTION_NOT_FOUND",
+    "NVML_ERROR_CORRUPTED_INFOROM",
+    "NVML_ERROR_GPU_IS_LOST",
+    "NVML_ERROR_RESET_REQUIRED",
+    "NVML_ERROR_OPERATING_SYSTEM",
+    "NVML_ERROR_LIB_RM_VERSION_MISMATCH",
+    "NVML_ERROR_IN_USE",
+    "NVML_ERROR_MEMORY",
+    "NVML_ERROR_NO_DATA",
+    "NVML_ERROR_VGPU_ECC_NOT_SUPPORTED",
+    "NVML_ERROR_INSUFFICIENT_RESOURCES",
+    "NVML_ERROR_FREQ_NOT_SUPPORTED",
+    "NVML_ERROR_ARGUMENT_VERSION_MISMATCH",
+    "NVML_ERROR_DEPRECATED",
+    "NVML_ERROR_NOT_READY",
+    "NVML_ERROR_GPU_NOT_FOUND",
+    "NVML_ERROR_INVALID_STATE",
+    "NVML_ERROR_RESET_TYPE_NOT_SUPPORTED",
+];
+
 /* DATA */
 
 /// Struct containing per-GPU energy and power measurements along with the time they were taken.
@@ -159,7 +196,7 @@ impl GPUMonitor {
                     kind: NVMLUtilsErrorKind::NVMLOther,
                     message: format!(
                         "Failed to read power for GPU {}: error code {}",
-                        i, nvml_error
+                        i, NVML_ERROR_NAMES[nvml_error as usize]
                     ),
                 });
             }
