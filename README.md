@@ -57,6 +57,8 @@ Therefore, an example program that uses `libpwrm` to measure power usage and ene
 
 #include "power_meter.h"
 
+const float J_TO_KWH = (1 / 3.6e6f);
+
 int main(void) {
 	// (Optional) set the output directory and file names:
 	pwrm_set_output_dir("energy"); // No need to check the result if the path is a correct string.
@@ -96,7 +98,8 @@ int main(void) {
 		exit(EXIT_FAILURE);
 	}
 	printf("Average power usage: CPU %lf W, GPU %lf W\n", cpu_power, gpu_power);
-	printf("Total energy consumption: CPU %lf J, GPU %lf J\n", cpu_energy, gpu_energy);
+	printf("Total energy consumption: CPU %lf kWh (%lf J), GPU %lf kWh (%lf J)\n",
+        cpu_energy * J_TO_KWH, cpu_energy, gpu_energy * J_TO_KWH, gpu_energy);
 
 	return 0;
 }
