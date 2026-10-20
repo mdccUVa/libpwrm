@@ -77,14 +77,14 @@ pwrmError_t pwrm_get_avg_cpu_power(double *avg_power_out);
 pwrmError_t pwrm_get_avg_gpu_power(double *avg_power_out);
 /// Gets the CPU's total energy consumption since monitoring started or the last counters reset:
 pwrmError_t pwrm_get_total_cpu_energy(double *total_energy_out);
-/// Gets the CPU's total energy consumption since monitoring started or the last counters reset:
+/// Gets the GPU's total energy consumption since monitoring started or the last counters reset:
 pwrmError_t pwrm_get_total_gpu_energy(double *total_energy_out);
 /// Resets the power usage and energy consumption counters to zero,
 /// discarding all previously collected data:
 void pwrm_reset_counters(void);
 
 /// Sets the path of the output directory where the measured data will be saved
-/// (optional, "power_meter_out" by default, NULL uses the current directory).
+/// (optional, "pwrm_out" by default, NULL uses the current directory).
 pwrmError_t pwrm_set_output_dir(const char *path_ptr);
 /// Sets the name for the output file containing the CPU data
 /// (optional, "cpu" by default; NULL or "" deactivate it).

@@ -53,7 +53,7 @@ impl Default for MonitoringConfig {
             do_monitoring: true,
             do_reset: true,
             monitoring_thread: None,
-            output_dir: "power_meter_out".to_string(),
+            output_dir: "pwrm_out".to_string(),
             // Intel: Initialize internal counters
             cpu_monitor: CPUMonitor::new()
                 .expect("[POWER METER] An error was encountered during initialization"),
