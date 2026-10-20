@@ -106,25 +106,39 @@ fn monitoring_loop(sampling_interval_ms: u64) {
     {
         is_saving |= CONFIG.lock().unwrap().gpu_out_filename.is_some();
     }
-    if is_saving {
-        fs::create_dir_all(&CONFIG.lock().unwrap().output_dir)
-            .expect("[POWER METER] Failed to create output directory");
-    }
+    let (mut cpu_out, mut gpu_out) = if is_saving {
+        let config = CONFIG.lock().unwrap();
+        let output_dir = &config.output_dir;
+        fs::create_dir_all(output_dir).expect("[POWER METER] Failed to create output directory");
 
-    let mut cpu_out = match CONFIG.lock().unwrap().cpu_out_filename {
-        Some(ref filename) => Some(
-            File::create(Path::new(&CONFIG.lock().unwrap().output_dir).join(filename))
-                .expect("[POWER METER] Failed to create CPU output file"),
-        ),
-        None => None,
-    };
-    #[cfg(feature = "nvidia")]
-    let mut gpu_out = match CONFIG.lock().unwrap().gpu_out_filename {
-        Some(ref filename) => Some(
-            File::create(Path::new(&CONFIG.lock().unwrap().output_dir).join(filename))
-                .expect("[POWER METER] Failed to create GPU output file"),
-        ),
-        None => None,
+        let cpu_out = match config.cpu_out_filename {
+            Some(ref filename) => Some(
+                File::create(Path::new(output_dir).join(filename))
+                    .expect("[POWER METER] Failed to create CPU output file"),
+            ),
+            None => None,
+        };
+        #[cfg(feature = "nvidia")]
+        let gpu_out = match config.gpu_out_filename {
+            Some(ref filename) => Some(
+                File::create(Path::new(output_dir).join(filename))
+                    .expect("[POWER METER] Failed to create GPU output file"),
+            ),
+            None => None,
+        };
+        #[cfg(not(feature = "nvidia"))]
+        let gpu_out = ();
+
+        (cpu_out, gpu_out)
+    } else {
+        let cpu_out = None;
+
+        #[cfg(feature = "nvidia")]
+        let gpu_out = None;
+        #[cfg(not(feature = "nvidia"))]
+        let gpu_out = ();
+
+        (cpu_out, gpu_out)
     };
 
     // Write the header for the output files:
@@ -208,7 +222,9 @@ fn monitoring_loop(sampling_interval_ms: u64) {
             #[cfg(feature = "nvidia")]
             swap(&mut cuda_data, &mut current_cuda_data);
 
-            log::debug!("Writing results to file (if enabled).");
+            if is_saving {
+                log::debug!("Writing results to file");
+            }
             if let Some(cpu_out) = &mut cpu_out {
                 writeln!(
                     cpu_out,
@@ -230,7 +246,7 @@ fn monitoring_loop(sampling_interval_ms: u64) {
             do_monitoring = config.do_monitoring;
         }
 
-        log::debug!("Finished taking a sample.");
+        log::debug!("Finished taking a sample");
     }
 }
 
