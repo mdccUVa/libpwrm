@@ -2,9 +2,11 @@
 
 This is a Rust reimplementation of [apt-sim's Power Meter library](https://github.com/apt-sim/power_meter), with certain ehancements and improvements.
 
-This library provides a software power usage and energy consumption meter for Intel and AMD CPUs, and NVIDIA GPUs. On CPU it reads from Intel and AMD's RAPL interfaces, while on GPU it uses NVIDIA's NVML interface.
+This Linux library provides a software power usage and energy consumption meter for Intel and AMD CPUs, and NVIDIA GPUs. On CPU it reads from Intel and AMD's RAPL interfaces, while on GPU it uses NVIDIA's [NVML](https://developer.nvidia.com/management-library-nvml) interface.
 
 ## Usage
+
+### Installation
 
 This project compiles to a dynamic library, `libpwrm.so`, usable in C and C++ projects.
 
@@ -16,37 +18,79 @@ cargo build --release
 
 `libpwrm.so` will be found in `target/release/`.
 
-To use it in your C/C++ project, include `include/power_meter.h` in your relevant source files, and link against `libpwrm.so` when compiling.
+NVIDIA GPU support can be turned off by adding `--no-default-features` to the `cargo build` command.
+
+To use it in your C/C++ project, include `include/power_meter.h` in your relevant source files, and link against `libpwrm.so` when compiling (add `-L<path to libpwrm.so> -lpwrm` to the compilation command). If NVIDIA GPU support is enabled (it is by default), do not forget to link against `libnvidia-ml.so` too (add `-L<path to libnvidia-ml.so> -lnvidia-ml` to the compilation command).
+
+To run an application that uses libpwrm, you need to either:
+ * run the application as superuser every time, to read the CPU's MSR register on `/dev/cpu/*/msr`
+ * have [msr\_safe](https://github.com/LLNL/msr-safe) properly installed and setup (requires superuser privileges)
+
+A correct **msr_safe configuration** must allow reading the following CPU registers:
+ * Power Unit
+ * Package Energy Status
+ * PP0 Energy Status
+ * Core Energy Status
+ * Package Power Info (only on Intel)
+You may use the following configuration files for that:
+
+**Intel CPUs**
+```
+# MSR Write mask
+0x606 0x0000000000000000 # POWER_UNIT
+0x611 0x0000000000000000 # ENERGY_STATUS
+0x639 0x0000000000000000 # PP0_ENERGY_STATUS
+0x614 0x0000000000000000 # PKG_POWER_INFO
+```
+
+**AMD CPUs**
+```
+# MSR Write mask
+0xC0010299 0x0000000000000000 # POWER_UNIT
+0xC001029B 0x0000000000000000 # ENERGY_STATUS
+0xC001029A 0x0000000000000000 # PP0_ENERGY_STATUS
+# PKG_POWER_INFO does not exist in AMD CPUs
+```
+
+Save the configuration file as `allowlist.txt` and configure msr\_safe with:
+```
+sudo cat new_msr_allowlist.txt > /dev/cpu/msr_allowlist
+```
+(Note that, if Udev setup is not performed for msr\_safe, you might need to redo this last allowlist step every time the system reboots.)
+
+After that, you are ready to run your application without superuser privileges.
+
+### Integration within an application
 
 `power_meter.h` exposes the following functions:
 
 ```c
-// Starts monitoring the power usage and energy consumption of the system's CPU and GPU
-// at the specified sampling interval (in milliseconds).
+/// Starts monitoring the power usage and energy consumption of the system's CPU and GPU
+/// at the specified sampling interval (in milliseconds).
 void pwrm_launch_monitoring_loop(uint64_t sampling_interval_ms);
-// Stops monitoring the power usage and energy consumption of the system.
+/// Stops monitoring the power usage and energy consumption of the system.
 pwrmError_t pwrm_stop_monitoring_loop(void);
 
-// Gets the CPU's average power usage since monitoring started or the last counters reset:
+/// Gets the CPU's average power usage since monitoring started or the last counters reset:
 pwrmError_t pwrm_get_avg_cpu_power(double *avg_power_out);
-// Gets the GPU's average power usage since monitoring started or the last counters reset:
+/// Gets the GPU's average power usage since monitoring started or the last counters reset:
 pwrmError_t pwrm_get_avg_gpu_power(double *avg_power_out);
-// Gets the CPU's total energy consumption since monitoring started or the last counters reset:
+/// Gets the CPU's total energy consumption since monitoring started or the last counters reset:
 pwrmError_t pwrm_get_total_cpu_energy(double *total_energy_out);
-// Gets the CPU's total energy consumption since monitoring started or the last counters reset:
+/// Gets the CPU's total energy consumption since monitoring started or the last counters reset:
 pwrmError_t pwrm_get_total_gpu_energy(double *total_energy_out);
-// Resets the power usage and energy consumption counters to zero,
-// discarding all previously collected data:
+/// Resets the power usage and energy consumption counters to zero,
+/// discarding all previously collected data:
 void pwrm_reset_counters(void);
 
-// Sets the path of the output directory where the measured data will be saved
-// (optional, "power_meter_out" by default, NULL uses the current directory).
+/// Sets the path of the output directory where the measured data will be saved
+/// (optional, "power_meter_out" by default, NULL uses the current directory).
 pwrmError_t pwrm_set_output_dir(const char *path_ptr);
-// Sets the name for the output file containing the CPU data
-// (optional, "cpu" by default; NULL or "" deactivate it).
+/// Sets the name for the output file containing the CPU data
+/// (optional, "cpu" by default; NULL or "" deactivate it).
 pwrmError_t pwrm_set_cpu_out_filename(const char *filename_ptr);
-// Sets the name for the output file containing the GPU data
-// (optional, "gpu" by default; NULL or "" deactivate it).
+/// Sets the name for the output file containing the GPU data
+/// (optional, "gpu" by default; NULL or "" deactivate it).
 pwrmError_t pwrm_set_gpu_out_filename(const char *filename_ptr);
 ```
 
