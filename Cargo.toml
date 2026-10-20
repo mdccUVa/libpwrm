@@ -1,6 +1,6 @@
 [package]
 name = "pwrm"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 authors = ["Manuel de Castro <manuel@infor.uva.es>"]
 repository = "https://github.com/mdccUVa/power-meter-gs"
