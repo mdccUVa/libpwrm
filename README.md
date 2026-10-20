@@ -1,4 +1,4 @@
-# Power Meter
+# Power Meter Library (libpwrm)
 
 This is a Rust reimplementation of [apt-sim's Power Meter library](https://github.com/apt-sim/power_meter), with certain ehancements and improvements.
 
@@ -54,7 +54,7 @@ You may use the following configuration files for that:
 
 Save the configuration file as `allowlist.txt` and configure msr\_safe with:
 ```
-sudo cat new_msr_allowlist.txt > /dev/cpu/msr_allowlist
+sudo cat allowlist.txt > /dev/cpu/msr_allowlist
 ```
 (Note that, if Udev setup is not performed for msr\_safe, you might need to redo this last allowlist step every time the system reboots.)
 
@@ -94,7 +94,7 @@ pwrmError_t pwrm_set_cpu_out_filename(const char *filename_ptr);
 pwrmError_t pwrm_set_gpu_out_filename(const char *filename_ptr);
 ```
 
-Therefore, an example program that uses `libpwrm` to measure power usage and energy consumption could be the following:
+Therefore, an example program that uses libpwrm to measure power usage and energy consumption could be the following:
 ```c
 #include <stdlib.h>
 #include <stdio.h>
