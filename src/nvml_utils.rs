@@ -131,7 +131,7 @@ impl Display for NVMLUtilsError {
 impl GPUMonitor {
     pub(super) fn new() -> Self {
         unsafe { nvmlInit_v2() };
-        log::debug!("Called nvmlInit_v2()");
+        log::debug!("Called nvmlInit_v2().");
 
         let mut num_gpus = 0;
         unsafe {
@@ -149,7 +149,7 @@ impl GPUMonitor {
             can_read_energy.push(true);
         }
 
-        log::info!("Number of GPUs detected: {}", num_gpus);
+        log::info!("Number of GPUs detected: {}.", num_gpus);
 
         Self {
             num_gpus,
@@ -173,7 +173,7 @@ impl GPUMonitor {
                 }
                 if nvml_error != NVML_SUCCESS {
                     log::warn!(
-                        "Failed to read energy for GPU {}; using estimation from power",
+                        "Failed to read energy for GPU {}; using estimation from power.",
                         i,
                     );
                     self.can_read_energy[i] = false;
@@ -288,6 +288,6 @@ impl GPUMonitor {
 impl Drop for GPUMonitor {
     fn drop(&mut self) {
         unsafe { nvmlShutdown() };
-        log::debug!("Called nvmlShutdown()");
+        log::debug!("Called nvmlShutdown().");
     }
 }

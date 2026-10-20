@@ -200,7 +200,7 @@ impl CPUMonitor {
                 return Err(RAPLUtilsError {
                     kind: RAPLUtilsErrorKind::UnknownVendor,
                     message: format!("CPU Vendor ID not recognised: {:#x}", vendor_id),
-                })
+                });
             }
         };
 
@@ -224,7 +224,7 @@ impl CPUMonitor {
                         "Could not read /sys/devices/system/node/online: {}",
                         e.to_string()
                     ),
-                })
+                });
             }
         };
 
@@ -257,7 +257,7 @@ impl CPUMonitor {
                     return Err(RAPLUtilsError {
                         kind: RAPLUtilsErrorKind::BadSystemFile,
                         message: format!("Could not parse {}", node_path),
-                    })
+                    });
                 }
             }
         }
@@ -287,7 +287,7 @@ impl CPUMonitor {
                 return Err(RAPLUtilsError {
                     kind: RAPLUtilsErrorKind::BadSystemFile,
                     message: "Could not parse /sys/devices/system/cpu/online".to_string(),
-                })
+                });
             }
         };
 
